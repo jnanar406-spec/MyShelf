@@ -65,13 +65,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const user = sessionUser();
     if (!user) return;
     const fields = $$("#profile-details dd");
-    [user.name, user.username, user.email, user.category || "Not selected", (user.subjects || []).filter(Boolean).join(", ") || "No subjects"].forEach((value, index) => fields[index].textContent = value);
+    const priorities = user.subjectPriorities?.length ? user.subjectPriorities.map((subject, index) => `${index + 1}. ${subject}`).join(", ") : user.prioritySubject ? `1. ${user.prioritySubject}` : "Not selected";
+    [user.name, user.username, user.email, user.category || "Not selected", (user.subjects || []).filter(Boolean).join(", ") || "No subjects", priorities].forEach((value, index) => fields[index].textContent = value);
     const form = $("#edit-profile-form");
     form.elements["name"].value = user.name;
     form.elements["username"].value = user.username;
     form.elements["email"].value = user.email;
     form.elements["category"].value = user.category || "School / Primary";
     form.elements["subjects"].value = (user.subjects || []).filter(Boolean).join(", ");
+    updatePriorityOptions(user.subjectPriorities || (user.prioritySubject ? [user.prioritySubject] : []));
+  }
+
+  function updatePriorityOptions(selected = []) {
+    const form = $("#edit-profile-form"), list = $("#subject-priority-list");
+    const subjects = form.elements["subjects"].value.split(",").map((subject) => subject.trim()).filter(Boolean);
+    const current = [...list.querySelectorAll("select")].reduce((priorities, select) => { if (select.value) priorities[Number(select.value) - 1] = select.dataset.subject; return priorities; }, selected);
+    list.replaceChildren();
+    if (!subjects.length) { list.textContent = "Add subjects above to set their priority order."; return; }
+    subjects.forEach((subject) => {
+      const label = document.createElement("label"), select = document.createElement("select"), savedRank = current.indexOf(subject) + 1;
+      label.textContent = subject; select.dataset.subject = subject; select.className = "subject-priority-select"; select.add(new Option("Not ranked", ""));
+      subjects.forEach((_, index) => select.add(new Option(`Priority ${index + 1}`, String(index + 1)))); select.value = savedRank ? String(savedRank) : "";
+      label.append(select); list.append(label);
+    });
   }
 
   $("#signup-form").addEventListener("submit", (event) => {
@@ -119,14 +135,27 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     const form = event.currentTarget, user = sessionUser();
     if (!user || !form.reportValidity()) return;
-    user.name = form.elements["name"].value.trim(); user.username = form.elements["username"].value.trim(); user.email = form.elements["email"].value.trim().toLowerCase(); user.category = form.elements["category"].value; user.subjects = form.elements["subjects"].value.split(",").map((item) => item.trim()); data.session = user.email; write(); notify("Profile updated."); go("account");
+    const rankedSelects = [...$("#subject-priority-list").querySelectorAll("select")].filter((select) => select.value).sort((a, b) => Number(a.value) - Number(b.value));
+    if (new Set(rankedSelects.map((select) => select.value)).size !== rankedSelects.length) return notify("Give each subject a different priority number.");
+    const ranked = rankedSelects.map((select) => select.dataset.subject);
+    user.name = form.elements["name"].value.trim(); user.username = form.elements["username"].value.trim(); user.email = form.elements["email"].value.trim().toLowerCase(); user.category = form.elements["category"].value; user.subjects = form.elements["subjects"].value.split(",").map((item) => item.trim()).filter(Boolean); user.subjectPriorities = ranked; delete user.prioritySubject; data.session = user.email; write(); notify(ranked.length ? `Subject priorities saved: ${ranked.map((subject, index) => `${index + 1}. ${subject}`).join(", ")}.` : "Profile updated."); go("account");
   });
+  $("#edit-profile-form").elements["subjects"].addEventListener("input", () => updatePriorityOptions());
   $("#settings-form").addEventListener("submit", (event) => { event.preventDefault(); write(); notify("Settings saved."); go("home"); });
   $$("#pro-plan button").forEach((button) => button.addEventListener("click", () => notify(`${button.textContent.trim()} is a frontend-only placeholder.`)));
 
   const cleanText = (text) => text.replace(/\s+/g, " ").trim();
   const sentencesFromNotes = () => (data.uploadedText || "").match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(cleanText).filter((sentence) => sentence.length > 20) || [];
-  const noteSummary = () => sentencesFromNotes().slice(0, 3);
+  const noteSummary = () => {
+    const sentences = sentencesFromNotes(), sourceLength = data.uploadedText?.length || 0;
+    if (!sentences.length) return [];
+    // Long uploads receive about 5,500 characters (roughly 1½ reading pages), sampled across the document.
+    const targetCharacters = sourceLength >= 25000 ? 5500 : Math.min(4000, Math.max(1200, Math.round(sourceLength * 0.2)));
+    const averageLength = Math.max(1, Math.round(sentences.reduce((total, sentence) => total + sentence.length, 0) / sentences.length));
+    const count = Math.min(sentences.length, Math.max(3, Math.ceil(targetCharacters / averageLength)));
+    if (count === sentences.length) return sentences;
+    return Array.from({ length: count }, (_, index) => sentences[Math.round(index * (sentences.length - 1) / (count - 1))]);
+  };
   const speak = (text) => { if (!("speechSynthesis" in window)) return notify("Voice narration is not available in this browser."); speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.94; speechSynthesis.speak(utterance); };
   const stopSpeaking = () => window.speechSynthesis?.cancel();
   const makeCards = () => {

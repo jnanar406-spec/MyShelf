@@ -34,11 +34,12 @@ window.DocumentReader = (() => {
 
   async function extractText(file) {
     const extension = extensionOf(file.name);
-    if (["txt", "md", "csv", "json", "html", "htm", "xml"].includes(extension)) return normalize(await readTextFile(file));
+    if (["txt", "md", "csv", "tsv", "json", "html", "htm", "xml", "rtf", "log", "yaml", "yml"].includes(extension)) return normalize(await readTextFile(file));
     if (extension === "pdf") return normalize(await readPdf(file));
     if (["docx", "pptx"].includes(extension)) return normalize(await readOfficeFile(file, extension));
-    if (["doc", "ppt"].includes(extension)) throw new Error(`Please save this older .${extension} file as .${extension}x, then upload it again.`);
-    throw new Error("Unsupported file type. Upload PDF, DOCX, PPTX, or a text-based notes file.");
+    if (["doc", "ppt"].includes(extension)) throw new Error(`This older .${extension.toUpperCase()} file was selected successfully, but it needs to be saved as .${extension}x before its text can be read.`);
+    if (file.type.startsWith("text/")) return normalize(await readTextFile(file));
+    throw new Error("This file was selected, but its text cannot be read in the browser. Use a PDF, DOCX, PPTX, or text-based file, or convert the file to one of those formats.");
   }
 
   return { extractText };

@@ -110,6 +110,8 @@
           <dd>School / Primary</dd>
           <dt>Subjects</dt>
           <dd>Subject list</dd>
+          <dt>Subject priorities</dt>
+          <dd id="profile-priority-subject">Not selected</dd>
         </dl>
         <nav id="account-actions">
           <a href="#edit-profile">Edit</a><a href="#signup">Add Account</a
@@ -132,6 +134,7 @@
               <option value="other">Other</option>
             </select></label
           ><label>Subjects <input name="subjects" /></label
+          ><fieldset class="subject-priorities"><legend>Subject priorities</legend><p>Set 1 for the subject you find most difficult, then 2, 3, and so on.</p><div id="subject-priority-list"></div></fieldset>
           ><button type="submit">Save</button>
         </form>
       </section>
@@ -179,7 +182,7 @@
         <form id="upload-form">
           <label
             >Select Notes File
-            <input name="notes-file" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.csv,.json,.html,.htm,.xml" required /></label
+            <input name="notes-file" type="file" accept="*/*" required /></label
           ><button type="submit">Start Learning</button>
         </form>
         <a href="#home">Back</a>
@@ -200,6 +203,10 @@
       </section>
       <section id="summary" class="page">
         <h2>Summarized Text</h2>
+        <article id="summary-analysis" class="summary-analysis">
+          <h3>Topics to remember</h3>
+          <p>Upload a file to identify the most important topics.</p>
+        </article>
         <article id="summary-content">
           <p>Your notes summary appears here.</p>
         </article>
