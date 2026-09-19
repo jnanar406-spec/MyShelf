@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Learn From Your Notes</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header id="site-header">
+      <h1>Learn From Your Notes</h1>
+      <nav id="top-navigation" aria-label="Main navigation">
+        <a href="#home">Home</a><a href="#account">Account</a
+        ><a href="#settings">Settings</a><a href="#plans">Plans</a>
+      </nav>
+    </header>
+    <main id="app">
+      <section id="signup" class="page">
+        <h2>Sign Up</h2>
+        <form id="signup-form">
+          <label>Name <input name="name" required /></label
+          ><label>Username <input name="username" required /></label
+          ><label>Email <input name="email" type="email" required /></label
+          ><label
+            >Password <input name="password" type="password" required /></label
+          ><button type="submit">Continue</button>
+        </form>
+        <p>Already have an account? <a href="#login">Login</a></p>
+      </section>
+      <section id="login" class="page">
+        <h2>Login</h2>
+        <form id="login-form">
+          <label>Email or Username <input name="identity" required /></label
+          ><label
+            >Password <input name="password" type="password" required /></label
+          ><button type="submit">Login</button>
+        </form>
+        <p>New here? <a href="#signup">Create an account</a></p>
+      </section>
+      <section id="category" class="page">
+        <h2>Choose Category</h2>
+        <form id="category-form">
+          <fieldset>
+            <legend>Study Category</legend>
+            <label
+              ><input
+                name="category"
+                type="radio"
+                value="school-primary"
+                required
+              />School / Primary</label
+            ><label><input name="category" type="radio" value="pu" />PU</label
+            ><label
+              ><input name="category" type="radio" value="other" />Other</label
+            >
+          </fieldset>
+          <a href="#signup">Back</a><button type="submit">Continue</button>
+        </form>
+      </section>
+      <section id="subjects" class="page">
+        <h2>Enter Subjects</h2>
+        <form id="subjects-form">
+          <label>Subject 1 <input name="subject-1" required /></label
+          ><label>Subject 2 <input name="subject-2" /></label
+          ><label>Subject 3 <input name="subject-3" /></label
+          ><a href="#category">Back</a><button type="submit">Go to Home</button>
+        </form>
+      </section>
+      <section id="home" class="page">
+        <h2>Home Dashboard</h2>
+        <section id="dashboard-actions">
+          <a id="upload-file-button" href="#upload">Upload File</a
+          ><a id="exam-mode-button" href="#exam-mode-actions">Exam Mode</a>
+        </section>
+        <section id="dashboard-progress">
+          <article id="score-card">
+            <h3>Score</h3>
+            <p id="home-score">0</p>
+            <a href="#score-details">View Score</a>
+          </article>
+          <article id="performance-card">
+            <h3>Performance</h3>
+            <p id="home-performance">No exam taken yet</p>
+            <a href="#performance-details">View Performance</a>
+          </article>
+          <article id="streak-card">
+            <h3>Streak</h3>
+            <p id="home-streak">0 Days</p>
+          </article>
+          <article id="badge-card">
+            <h3>Badge Achieved</h3>
+            <p>No badges yet</p>
+            <a href="#badges">View Badges</a>
+          </article>
+        </section>
+      </section>
+      <section id="account" class="page">
+        <h2>My Profile</h2>
+        <dl id="profile-details">
+          <dt>Name</dt>
+          <dd>Your Name</dd>
+          <dt>Username</dt>
+          <dd>Username</dd>
+          <dt>Email</dt>
+          <dd>you@example.com</dd>
+          <dt>Category</dt>
+          <dd>School / Primary</dd>
+          <dt>Subjects</dt>
+          <dd>Subject list</dd>
+        </dl>
+        <nav id="account-actions">
+          <a href="#edit-profile">Edit</a><a href="#signup">Add Account</a
+          ><a href="#signup">Logout</a><a href="#delete-account">Delete</a
+          ><a id="animation-book-link" href="#animation-book">Animation Book</a
+          ><a href="#home">Home</a>
+        </nav>
+      </section>
+      <section id="edit-profile" class="page">
+        <h2>Edit Profile</h2>
+        <form id="edit-profile-form">
+          <label>Name <input name="name" required /></label
+          ><label>Username <input name="username" required /></label
+          ><label>Email <input name="email" type="email" required /></label
+          ><label
+            >Category
+            <select name="category">
+              <option value="school-primary">School / Primary</option>
+              <option value="pu">PU</option>
+              <option value="other">Other</option>
+            </select></label
+          ><label>Subjects <input name="subjects" /></label
+          ><button type="submit">Save</button>
+        </form>
+      </section>
+      <section id="delete-account" class="page">
+        <h2>Delete Account</h2>
+        <p>Are you sure you want to delete your account?</p>
+        <a href="#account">Back</a><a href="#signup">Delete</a>
+      </section>
+      <section id="settings" class="page">
+        <h2>Settings</h2>
+        <form id="settings-form">
+          <label
+            >Category
+            <select>
+              <option>School / Primary</option>
+              <option>PU</option>
+              <option>Other</option>
+            </select></label
+          ><button type="submit">Save Settings</button>
+        </form>
+        <a href="#home">Back</a>
+      </section>
+      <section id="plans" class="page">
+        <h2>Plans</h2>
+        <article id="pro-plan">
+          <h3>Pro Plan</h3>
+          <p>₹399</p>
+          <p>Paid access to notes from other sources and users.</p>
+          <h4>What's Included</h4>
+          <ul>
+            <li>Public access to notes</li>
+            <li>Test analysis</li>
+            <li>Certificate for achievement</li>
+            <li>Community invite</li>
+            <li>Demo/video and voice tutor</li>
+            <li>AI assistant for tutoring</li>
+          </ul>
+          <button type="button">Purchase</button
+          ><button type="button">Free Trial — 7 Days</button>
+        </article>
+        <a href="#home">Home</a>
+      </section>
+      <section id="upload" class="page">
+        <h2>Upload File</h2>
+        <form id="upload-form">
+          <label
+            >Select Notes File
+            <input name="notes-file" type="file" required /></label
+          ><button type="submit">Start Learning</button>
+        </form>
+        <a href="#home">Back</a>
+      </section>
+      <section id="learning" class="page">
+        <h2>Learning Page</h2>
+        <nav id="learning-features">
+          <a href="#summary">Summarized Text</a
+          ><a href="#practice-test">Practice Test</a
+          ><a href="#demo-video">Demo / Video</a
+          ><a href="#flashcards">Flash Cards</a
+          ><a href="#voice-tutor">Voice Tutor</a>
+        </nav>
+        <p id="pro-feature-note">
+          Demo/Video and Voice Tutor are optional Pro Plan features.
+        </p>
+        <a href="#upload">Back</a>
+      </section>
+      <section id="summary" class="page">
+        <h2>Summarized Text</h2>
+        <article id="summary-content">
+          <p>Your notes summary appears here.</p>
+        </article>
+        <a id="save-summary" href="#animation-book">Save</a
+        ><a href="#learning">Back</a>
+      </section>
+      <section id="demo-video" class="page">
+        <h2>Demo / Video</h2>
+        <video id="learning-video" controls>
+          Your browser does not support video.</video
+        ><a href="#learning">Back</a>
+      </section>
+      <section id="voice-tutor" class="page">
+        <h2>Voice Tutor</h2>
+        <form id="voice-tutor-form">
+          <label>Question <textarea name="question"></textarea></label
+          ><button type="submit">Ask</button>
+        </form>
+        <a href="#learning">Back</a>
+      </section>
+      <section id="practice-test" class="page">
+        <h2>Practice Test</h2>
+        <p>Question 1 of 2</p>
+        <p>Based on the summarized text. No time limit.</p>
+        <form id="practice-test-form">
+          <fieldset>
+            <legend>Question based on your notes?</legend>
+            <label><input name="answer" type="radio" />Option A</label
+            ><label><input name="answer" type="radio" />Option B</label
+            ><label><input name="answer" type="radio" />Option C</label>
+          </fieldset>
+          <p class="answer-feedback">
+            Correct answers will be shown after selection.
+          </p>
+          <p class="explanation">
+            Explanation will appear after an option is selected.
+          </p>
+          <a href="#learning">Previous</a><button type="submit">Next</button>
+        </form>
+      </section>
+      <section id="practice-test-2" class="page">
+        <h2>Practice Test</h2>
+        <p>Question 2 of 2</p>
+        <form id="practice-test-final-form">
+          <fieldset>
+            <legend>Final question based on your notes?</legend>
+            <label><input name="answer" type="radio" />Option A</label
+            ><label><input name="answer" type="radio" />Option B</label
+            ><label><input name="answer" type="radio" />Option C</label>
+          </fieldset>
+          <p class="explanation">
+            Explanation will appear after an option is selected.
+          </p>
+          <a href="#practice-test">Previous</a
+          ><button type="submit">Finish</button>
+        </form>
+      </section>
+      <section id="final-score" class="page">
+        <h2>Final Score</h2>
+        <p id="score-result">0 / 2</p>
+        <a href="#practice-test">Previous</a><a href="#home">Home</a>
+      </section>
+      <section id="flashcards" class="page">
+        <h2>Flash Cards</h2>
+        <article id="flashcard-1">
+          <h3>Topic</h3>
+          <p>Topic name</p>
+          <h3>Key Points</h3>
+          <p>Key points</p>
+          <h3>Important Details</h3>
+          <p>Important details</p>
+          <h3>Memorization Techniques</h3>
+          <p>Memorization techniques</p>
+        </article>
+        <a href="#animation-book">Save</a><a href="#learning">Previous</a
+        ><a href="#flashcard-2">Proceed</a>
+      </section>
+      <section id="flashcard-2" class="page">
+        <h2>Flash Cards</h2>
+        <article>
+          <h3>Topic</h3>
+          <p>Next topic</p>
+          <h3>Key Points</h3>
+          <p>Key points</p>
+          <h3>Important Details</h3>
+          <p>Important details</p>
+          <h3>Memorization Techniques</h3>
+          <p>Memorization techniques</p>
+        </article>
+        <a href="#animation-book">Save</a><a href="#flashcards">Previous</a
+        ><a href="#learning">Proceed</a>
+      </section>
+      <section id="animation-book" class="page">
+        <h2>Animation Book</h2>
+        <section id="saved-summaries">
+          <h3>Saved Summaries</h3>
+          <p>No saved summaries yet.</p>
+        </section>
+        <section id="saved-topics">
+          <h3>Topics</h3>
+          <p>No saved topics yet.</p>
+        </section>
+        <section id="saved-flashcards">
+          <h3>Flash Cards</h3>
+          <p>No saved flash cards yet.</p>
+        </section>
+        <a href="#learning">Back</a><a href="#home">Home</a>
+      </section>
+      <section id="exam-mode-actions" class="page">
+        <h2>Exam Mode</h2>
+        <a href="#schedule-exam">Schedule Your Exam</a
+        ><a href="#scheduled-exams">Take Your Test</a><a href="#home">Home</a>
+      </section>
+      <section id="schedule-exam" class="page">
+        <h2>Schedule Exam</h2>
+        <form id="schedule-exam-form">
+          <label
+            >Exam Date
+            <input
+              id="exam-date"
+              name="exam-date"
+              type="date"
+              required /></label
+          ><label
+            >Subject and Saved Animation Book Content
+            <select id="exam-subject-topic" required>
+              <option value="">Select a saved subject or topic</option>
+              <option value="saved-summary">Saved Summary</option>
+              <option value="saved-topic">Saved Topic</option>
+              <option value="saved-flashcard">Saved Flash Card</option>
+            </select></label
+          >
+          <fieldset id="exam-level">
+            <legend>Exam Level</legend>
+            <label
+              ><input name="level" type="radio" value="level-1" required />Level
+              1 — Low</label
+            ><label
+              ><input name="level" type="radio" value="level-2" />Level 2 —
+              Medium</label
+            ><label
+              ><input name="level" type="radio" value="level-3" />Level 3 —
+              High</label
+            >
+          </fieldset>
+          <a href="#home">Back</a><button type="submit">Schedule Exam</button>
+        </form>
+      </section>
+      <section id="exam-reminders" class="page">
+        <h2>Exam Reminders</h2>
+        <p id="scheduled-exam-date">
+          Your scheduled exam date will appear here.
+        </p>
+        <section id="exam-notifications">
+          <h3>Notifications</h3>
+          <p>Exam reminders will appear here until the scheduled date.</p>
+        </section>
+        <a href="#schedule-exam">Back</a
+        ><a id="start-scheduled-exam" href="#exam">Proceed to Exam</a
+        ><a href="#home">Home</a>
+      </section>
+      <section id="exam" class="page">
+        <header>
+          <h2>Exam</h2>
+          <p id="exam-timer">Time Remaining: --:--</p>
+          <p id="exam-tab-status">Remain on this exam page until submission.</p>
+        </header>
+        <form id="exam-form">
+          <section id="exam-question-area">
+            <h3 id="exam-question-heading">MCQ Question 1</h3>
+            <p id="exam-subject-display">
+              Selected subject/topic question appears here.
+            </p>
+            <fieldset>
+              <legend>Select one answer</legend>
+              <label
+                ><input
+                  name="exam-answer-1"
+                  type="radio"
+                  value="0"
+                  required
+                />Option A</label
+              ><label
+                ><input name="exam-answer-1" type="radio" value="1" />Option
+                B</label
+              ><label
+                ><input name="exam-answer-1" type="radio" value="2" />Option
+                C</label
+              ><label
+                ><input name="exam-answer-1" type="radio" value="3" />Option
+                D</label
+              >
+            </fieldset>
+            <p id="generated-question-note">
+              A different question can be generated for each attempt.
+            </p>
+          </section>
+          <nav id="exam-navigation">
+            <a href="#exam-reminders">Back</a
+            ><button type="button">Previous</button
+            ><button type="button">Next</button
+            ><button type="submit">Proceed and Submit</button>
+          </nav>
+        </form>
+      </section>
+      <section id="performance-report" class="page">
+        <h2>Performance Report</h2>
+        <section id="exam-results">
+          <h3>Exam Results</h3>
+          <p id="exam-score">Score: 0</p>
+          <p id="exam-performance">Performance: Not available</p>
+          <p id="exam-streak">Streak: 0 Days</p>
+          <p id="difficulty-recommendation">
+            Your next exam level may increase based on previous performance.
+          </p>
+        </section>
+        <a href="#schedule-exam">Schedule Another Exam</a
+        ><a href="#home">Home</a>
+      </section>
+      <section id="scheduled-exams" class="page">
+        <h2>Take Your Test</h2>
+        <table id="scheduled-exams-table">
+          <caption>
+            Scheduled Exam Progress
+          </caption>
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Date</th>
+              <th>Topic</th>
+              <th>Result</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Scheduled Test</td>
+              <td>Exam date</td>
+              <td>Selected subject/topic</td>
+              <td>Pending</td>
+              <td><a href="#exam">Take Test</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="#schedule-exam">Schedule Exam</a><a href="#home">Home</a>
+      </section>
+      <section id="score-details" class="page">
+        <h2>Score</h2>
+        <p id="overall-score">Overall Score: 0</p>
+        <dl id="topic-score-details">
+          <dt>Topic-wise Performance</dt>
+          <dd>Not available yet</dd>
+          <dt>Strengths</dt>
+          <dd>Not available yet</dd>
+          <dt>Weak Points</dt>
+          <dd>Not available yet</dd>
+          <dt>Needs Improvement</dt>
+          <dd>Not available yet</dd>
+          <dt>Recommended Next Action</dt>
+          <dd>Complete a practice test.</dd>
+        </dl>
+        <a href="#home">Home</a>
+      </section>
+      <section id="performance-details" class="page">
+        <h2>Performance</h2>
+        <table id="subject-performance-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Performance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Subject 1</td>
+              <td>Mastered</td>
+            </tr>
+            <tr>
+              <td>Subject 2</td>
+              <td>Developing</td>
+            </tr>
+            <tr>
+              <td>Subject 3</td>
+              <td>Weak</td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="recommended-performance-action">
+          Recommended: Review notes, practise tests, and attempt the next level
+          quiz.
+        </p>
+        <a href="#home">Home</a>
+      </section>
+      <section id="badges" class="page">
+        <h2>Badge Achieved</h2>
+        <ul id="badge-list">
+          <li>30 Days Streak <progress value="0" max="30"></progress></li>
+          <li>Quiz Champion <progress value="0" max="30"></progress></li>
+          <li>Topic Master <progress value="0" max="5"></progress></li>
+          <li>Flashcard Master <progress value="0" max="1"></progress></li>
+        </ul>
+        <a href="#home">Home</a>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
