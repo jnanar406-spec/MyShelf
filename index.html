@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Learn From Your Notes</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="ai-features.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.2/dist/jszip.min.js"></script>
   </head>
   <body>
     <header id="site-header">
@@ -176,7 +179,7 @@
         <form id="upload-form">
           <label
             >Select Notes File
-            <input name="notes-file" type="file" required /></label
+            <input name="notes-file" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.csv,.json,.html,.htm,.xml" required /></label
           ><button type="submit">Start Learning</button>
         </form>
         <a href="#home">Back</a>
@@ -204,38 +207,46 @@
         ><a href="#learning">Back</a>
       </section>
       <section id="demo-video" class="page">
-        <h2>Demo / Video</h2>
-        <video id="learning-video" controls>
-          Your browser does not support video.</video
-        ><a href="#learning">Back</a>
+        <h2>AI Video Lesson</h2>
+        <p id="video-source-label">Upload notes to create a narrated visual lesson.</p>
+        <section id="ai-video-player" aria-label="AI-generated lesson preview">
+          <div class="video-topbar"><span class="live-dot"></span> AI lesson studio <span id="video-progress">1 / 3</span></div>
+          <div id="video-scene" class="video-scene"><span class="scene-kicker">YOUR NOTES</span><h3 id="video-title">Ready to explain your notes</h3><p id="video-script">Upload a text-based file and the AI will turn its key points into a short visual lesson.</p></div>
+          <div class="video-timeline"><span id="video-timeline-fill"></span></div>
+        </section>
+        <nav class="ai-controls"><button id="play-ai-video" type="button">▶ Play lesson</button><button id="next-video-scene" type="button">Next scene</button><button id="stop-ai-video" type="button">Stop narration</button></nav>
+        <p class="ai-disclaimer">The lesson is generated from readable text in your upload. Review it against your original notes.</p><a href="#learning">Back</a>
       </section>
       <section id="voice-tutor" class="page">
-        <h2>Voice Tutor</h2>
-        <form id="voice-tutor-form">
-          <label>Question <textarea name="question"></textarea></label
-          ><button type="submit">Ask</button>
-        </form>
-        <a href="#learning">Back</a>
+        <h2>AI Voice Tutor</h2><p id="voice-tutor-context">Upload your notes to listen to their generated summary.</p>
+        <article id="voice-tutor-summary" class="ai-response" aria-live="polite"><h3>Summary ready to listen</h3><p>Upload a readable file to generate a summary for Voice Tutor.</p></article>
+        <fieldset id="voice-tutor-settings" class="voice-settings">
+          <legend>Voice controls</legend>
+          <label>Voice <select id="voice-tutor-voice" aria-label="Narrator voice"><option value="">Default browser voice</option></select></label>
+          <label>Speed <select id="voice-tutor-rate" aria-label="Narration speed"><option value="0.8">Slow</option><option value="1" selected>Normal</option><option value="1.2">Fast</option></select></label>
+        </fieldset>
+        <nav class="ai-controls" aria-label="Voice Tutor playback"><button id="play-tutor-summary" type="button" disabled>▶ Play summary</button><button id="pause-tutor-summary" type="button" disabled>⏸ Pause</button><button id="stop-tutor-voice" type="button" disabled>■ Stop</button></nav>
+        <p class="ai-disclaimer">Voice Tutor reads the complete AI-generated summary aloud. It does not answer questions or provide a chat.</p><a href="#learning">Back</a>
       </section>
       <section id="practice-test" class="page">
         <h2>Practice Test</h2>
         <p>Question 1 of 2</p>
-        <p>Based on the summarized text. No time limit.</p>
+        <p>Based only on your summarized text. No timer or levels.</p>
         <form id="practice-test-form">
           <fieldset>
             <legend>Question based on your notes?</legend>
             <label><input name="answer" type="radio" />Option A</label
             ><label><input name="answer" type="radio" />Option B</label
-            ><label><input name="answer" type="radio" />Option C</label>
+            ><label><input name="answer" type="radio" />Option C</label
+            ><label><input name="answer" type="radio" />Option D</label>
           </fieldset>
-          <p class="answer-feedback">
-            Correct answers will be shown after selection.
-          </p>
+          <p class="answer-feedback">Correct answers will be shown after selection.</p>
           <p class="explanation">
             Explanation will appear after an option is selected.
           </p>
-          <a href="#learning">Previous</a><button type="submit">Next</button>
+          <a href="#learning">Previous</a><button type="submit">Next</button><button class="answer-book-toggle" type="button">Answer Book</button>
         </form>
+        <details class="answer-book"><summary>Answer Book</summary><div></div></details>
       </section>
       <section id="practice-test-2" class="page">
         <h2>Practice Test</h2>
@@ -245,14 +256,16 @@
             <legend>Final question based on your notes?</legend>
             <label><input name="answer" type="radio" />Option A</label
             ><label><input name="answer" type="radio" />Option B</label
-            ><label><input name="answer" type="radio" />Option C</label>
+            ><label><input name="answer" type="radio" />Option C</label
+            ><label><input name="answer" type="radio" />Option D</label>
           </fieldset>
           <p class="explanation">
             Explanation will appear after an option is selected.
           </p>
           <a href="#practice-test">Previous</a
-          ><button type="submit">Finish</button>
+          ><button type="submit">Finish</button><button class="answer-book-toggle" type="button">Answer Book</button>
         </form>
+        <details class="answer-book"><summary>Answer Book</summary><div></div></details>
       </section>
       <section id="final-score" class="page">
         <h2>Final Score</h2>
@@ -261,48 +274,26 @@
       </section>
       <section id="flashcards" class="page">
         <h2>Flash Cards</h2>
-        <article id="flashcard-1">
-          <h3>Topic</h3>
-          <p>Topic name</p>
-          <h3>Key Points</h3>
-          <p>Key points</p>
-          <h3>Important Details</h3>
-          <p>Important details</p>
-          <h3>Memorization Techniques</h3>
-          <p>Memorization techniques</p>
+        <p class="flashcard-hint">Select the card to reveal the summary content.</p>
+        <article id="flashcard-1" class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
+          <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>SUBTOPIC</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>SUMMARY</span><p>Generated summary content will appear here.</p></section></div>
         </article>
         <a href="#animation-book">Save</a><a href="#learning">Previous</a
         ><a href="#flashcard-2">Proceed</a>
       </section>
       <section id="flashcard-2" class="page">
         <h2>Flash Cards</h2>
-        <article>
-          <h3>Topic</h3>
-          <p>Next topic</p>
-          <h3>Key Points</h3>
-          <p>Key points</p>
-          <h3>Important Details</h3>
-          <p>Important details</p>
-          <h3>Memorization Techniques</h3>
-          <p>Memorization techniques</p>
+        <p class="flashcard-hint">Select the card to reveal the summary content.</p>
+        <article class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
+          <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>SUBTOPIC</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>SUMMARY</span><p>Generated summary content will appear here.</p></section></div>
         </article>
         <a href="#animation-book">Save</a><a href="#flashcards">Previous</a
         ><a href="#learning">Proceed</a>
       </section>
       <section id="animation-book" class="page">
         <h2>Animation Book</h2>
-        <section id="saved-summaries">
-          <h3>Saved Summaries</h3>
-          <p>No saved summaries yet.</p>
-        </section>
-        <section id="saved-topics">
-          <h3>Topics</h3>
-          <p>No saved topics yet.</p>
-        </section>
-        <section id="saved-flashcards">
-          <h3>Flash Cards</h3>
-          <p>No saved flash cards yet.</p>
-        </section>
+        <p>Saved summaries and flashcards are grouped into subject folders.</p>
+        <section id="saved-folders" aria-live="polite"><p>No saved content yet.</p></section>
         <a href="#learning">Back</a><a href="#home">Home</a>
       </section>
       <section id="exam-mode-actions" class="page">
@@ -501,6 +492,10 @@
         <a href="#home">Home</a>
       </section>
     </main>
+    <script src="practice-test.js"></script>
+    <script src="voice-tutor.js"></script>
+    <script src="video-lesson.js"></script>
+    <script src="document-reader.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

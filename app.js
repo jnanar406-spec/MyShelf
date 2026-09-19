@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const $ = (selector, parent = document) => parent.querySelector(selector);
   const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
   const key = "learnFromNotesData";
-  const defaults = { users: [], session: null, saved: [], score: 0, streak: 0, lastStudy: "", badges: {} };
+  const defaults = { users: [], session: null, saved: [], score: 0, streak: 0, lastStudy: "", badges: {}, uploadedFile: "", uploadedText: "" };
   const read = () => {
     try {
       const stored = JSON.parse(localStorage.getItem(key) || "{}");
@@ -36,6 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (id === "animation-book") renderBook();
     if (id === "exam-reminders") renderReminder();
     if (id === "exam") startExam();
+    if (id === "voice-tutor") voiceTutor.renderContext();
+    if (id === "demo-video") videoLesson.renderScene();
+    if (id === "practice-test") practiceTest.render(0);
+    if (id === "practice-test-2") practiceTest.render(1);
   }
   window.addEventListener("hashchange", guard);
 
@@ -120,58 +124,49 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#settings-form").addEventListener("submit", (event) => { event.preventDefault(); write(); notify("Settings saved."); go("home"); });
   $$("#pro-plan button").forEach((button) => button.addEventListener("click", () => notify(`${button.textContent.trim()} is a frontend-only placeholder.`)));
 
+  const cleanText = (text) => text.replace(/\s+/g, " ").trim();
+  const sentencesFromNotes = () => (data.uploadedText || "").match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(cleanText).filter((sentence) => sentence.length > 20) || [];
+  const noteSummary = () => sentencesFromNotes().slice(0, 3);
+  const speak = (text) => { if (!("speechSynthesis" in window)) return notify("Voice narration is not available in this browser."); speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.94; speechSynthesis.speak(utterance); };
+  const stopSpeaking = () => window.speechSynthesis?.cancel();
+  const makeCards = () => {
+    const points = noteSummary();
+    if (!points.length) return [];
+    return [0, 1].map((index) => { const content = points[index] || points[0]; const topic = content.split(/\s+/).slice(0, 7).join(" ").replace(/[,:;]$/, ""); return { topic, question: `What does the summary say about “${topic}”?`, content }; });
+  };
+  const subjectForUpload = () => (data.uploadedFile || "General").replace(/\.[^.]+$/, "") || "General";
   $("#upload-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const file = $("input[type='file']", event.currentTarget).files[0];
-    if (!file) return notify("Please select a notes file.");
-    data.uploadedFile = file.name; markStudy(); write(); $("#summary-content p").textContent = `${file.name} is ready. Your summarized notes will appear here.`; notify(`${file.name} uploaded successfully.`); go("learning");
+    event.preventDefault(); const file = $("input[type='file']", event.currentTarget).files[0]; if (!file) return notify("Please select a file.");
+    notify(`Reading ${file.name}…`);
+    window.DocumentReader.extractText(file).then((text) => {
+      if (!text) return notify("No selectable text was found. This may be a scanned PDF; use an OCR-enabled version.");
+      data.uploadedFile = file.name; data.uploadedText = cleanText(text).slice(0, 80000); markStudy(); write();
+      $("#summary-content p").textContent = noteSummary().join(" ") || `${file.name} is ready for learning.`;
+      cards = makeCards(); redrawCards.forEach((draw) => draw()); practiceTest.refresh();
+      notify("Summary and flashcards generated. Save to Animation Book when you’re ready."); go("learning");
+    }).catch((error) => notify(error.message || "We could not read that file."));
   });
-  $("#voice-tutor-form").addEventListener("submit", (event) => { event.preventDefault(); const question = $("textarea", event.currentTarget).value.trim(); notify(question ? "Your voice tutor question has been received." : "Please type a question first."); });
+  const voiceTutor = window.LearnFeatures.createVoiceTutor({ $, data, notify, getSummary: () => noteSummary().join(" ") });
+  const videoLesson = window.LearnFeatures.createVideoLesson({ $, data, getSummary: noteSummary, speak, stopSpeaking });
+  const practiceTest = window.LearnFeatures.createPracticeTest({ $, $$, notify, go, getSummary: noteSummary });
 
-  const practice = [
-    { question: "What is the main idea of the uploaded notes?", options: ["The central concept", "An unrelated detail", "A random date"], answer: 0, explanation: "The correct answer identifies the central concept from the summary." },
-    { question: "Which study method best helps remember key points?", options: ["Active recall", "Skipping revision", "Ignoring the topic"], answer: 0, explanation: "Active recall strengthens memory through repeated retrieval." }
-  ];
-  let practiceAnswers = [];
-  function renderPractice(index) {
-    const page = index ? $("#practice-test-2") : $("#practice-test");
-    $("h2", page).nextElementSibling.textContent = `Question ${index + 1} of ${practice.length}`;
-    $("legend", page).textContent = practice[index].question;
-    $$("fieldset label", page).forEach((label, option) => { const radio = $("input", label); radio.value = option; radio.checked = practiceAnswers[index] === option; label.lastChild.textContent = ` ${practice[index].options[option]}`; label.style.background = ""; });
-    $(".explanation", page).textContent = "Select an answer to see the explanation.";
-  }
-  function gradePractice(index, page) {
-    const selected = $("input:checked", page); if (!selected) { notify("Select an answer before continuing."); return false; }
-    const answer = Number(selected.value); practiceAnswers[index] = answer;
-    $$("fieldset label", page).forEach((label, option) => label.style.background = option === practice[index].answer ? "#d9f8e9" : option === answer ? "#ffe1e1" : "");
-    $(".explanation", page).textContent = practice[index].explanation;
-    return true;
-  }
-  [0,1].forEach((index) => {
-    const page = index ? $("#practice-test-2") : $("#practice-test"), form = $("form", page);
-    $$("input", page).forEach((input) => input.addEventListener("change", () => gradePractice(index, page)));
-    form.addEventListener("submit", (event) => { event.preventDefault(); if (!gradePractice(index, page)) return; if (!index) { renderPractice(1); go("practice-test-2"); } else { const earned = practiceAnswers.reduce((total, answer, i) => total + (answer === practice[i].answer ? 1 : 0), 0); data.score += earned * 10; data.badges.quizzes = (data.badges.quizzes || 0) + 1; data.lastPerformance = `${earned}/${practice.length} in Practice Test`; markStudy(); write(); $("#score-result").textContent = `${earned} / ${practice.length}`; notify("Practice test complete!"); go("final-score"); } });
-  });
-  renderPractice(0); renderPractice(1);
-
-  const cards = [
-    { topic: "Topic Name", points: "Key points", details: "Important details", memory: "Memorization techniques" },
-    { topic: "Next Topic", points: "Next key points", details: "Next important details", memory: "Use a short story or acronym." }
-  ];
-  function flashCard(page, card, index) {
+  let cards = [];
+  function flashCard(page, index) {
     const article = $("article", page);
-    article.tabIndex = 0; article.setAttribute("role", "button");
-    const face = () => article.dataset.flipped === "true";
-    const draw = () => { article.innerHTML = face() ? `<h3>Key Points</h3><p>${card.points}</p><h3>Important Details</h3><p>${card.details}</p><h3>Memorization Techniques</h3><p>${card.memory}</p>` : `<h3>Topic</h3><p>${card.topic}</p><p>Click this card to flip it.</p>`; };
-    const flip = () => { article.dataset.flipped = String(!face()); draw(); };
+    const frontTitle = $(".flashcard-front h3", article), frontText = $(".flashcard-front p", article), backText = $(".flashcard-back p", article);
+    const draw = () => { const current = cards[index]; article.classList.remove("is-flipped"); if (!current) { frontTitle.textContent = "Upload notes to begin"; frontText.textContent = "What key idea should you remember?"; backText.textContent = "Generated summary content will appear here."; return; } frontTitle.textContent = current.topic; frontText.textContent = current.question; backText.textContent = current.content; };
+    const flip = () => article.classList.toggle("is-flipped");
     article.addEventListener("click", flip); article.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); flip(); } }); draw();
-    $("a[href='#animation-book']", page).addEventListener("click", (event) => { event.preventDefault(); const saved = { type: "Flash Card", title: card.topic, content: `${card.points} — ${card.details}` }; if (!data.saved.some((item) => item.title === saved.title)) data.saved.push(saved); markStudy(); write(); notify("Flash card saved to Animation Book."); go("animation-book"); });
+    $("a[href='#animation-book']", page).addEventListener("click", (event) => { event.preventDefault(); const current = cards[index]; if (!current) return notify("Generate flashcards from an uploaded summary first."); const saved = { type: "Flash Card", subject: subjectForUpload(), title: current.topic, content: current.content }; if (!data.saved.some((item) => item.type === saved.type && item.title === saved.title && item.subject === saved.subject)) data.saved.push(saved); markStudy(); write(); notify(`Flashcard saved to the ${saved.subject} folder in Animation Book.`); go("animation-book"); });
+    return draw;
   }
-  flashCard($("#flashcards"), cards[0], 0); flashCard($("#flashcard-2"), cards[1], 1);
-  $("#save-summary").addEventListener("click", (event) => { event.preventDefault(); const saved = { type: "Summary", title: data.uploadedFile || "Saved Summary", content: $("#summary-content p").textContent }; if (!data.saved.some((item) => item.title === saved.title)) data.saved.push(saved); markStudy(); write(); notify("Summary saved to Animation Book."); go("animation-book"); });
+  const redrawCards = [flashCard($("#flashcards"), 0), flashCard($("#flashcard-2"), 1)];
+  $("#save-summary").addEventListener("click", (event) => { event.preventDefault(); const saved = { type: "Summary", subject: subjectForUpload(), title: data.uploadedFile || "Saved Summary", content: $("#summary-content p").textContent }; if (!data.saved.some((item) => item.type === saved.type && item.title === saved.title && item.subject === saved.subject)) data.saved.push(saved); markStudy(); write(); notify(`Summary saved to the ${saved.subject} folder in Animation Book.`); go("animation-book"); });
   function renderBook() {
-    const areas = { Summary: $("#saved-summaries"), "Flash Card": $("#saved-flashcards"), Topic: $("#saved-topics") };
-    Object.entries(areas).forEach(([type, area]) => { const heading = $("h3", area); area.innerHTML = ""; area.append(heading); data.saved.filter((item) => item.type === type || (type === "Topic" && item.type === "Flash Card")).forEach((item) => { const button = document.createElement("button"); button.type = "button"; button.textContent = item.title; button.addEventListener("click", () => notify(item.content)); area.append(button); }); if (area.children.length === 1) area.append(document.createElement("p")).textContent = "No saved content yet."; });
+    const folders = $("#saved-folders"); folders.replaceChildren();
+    if (!data.saved.length) { folders.append(document.createElement("p")).textContent = "No saved content yet."; return; }
+    const bySubject = data.saved.reduce((groups, item) => { const subject = item.subject || "General"; (groups[subject] ||= []).push(item); return groups; }, {});
+    Object.entries(bySubject).forEach(([subject, items]) => { const folder = document.createElement("details"), heading = document.createElement("summary"), content = document.createElement("div"); folder.className = "subject-folder"; folder.open = true; heading.textContent = `${subject} (${items.length})`; content.className = "subject-folder-content"; items.forEach((item) => { const button = document.createElement("button"); button.type = "button"; button.textContent = `${item.type}: ${item.title}`; button.addEventListener("click", () => notify(item.content)); content.append(button); }); folder.append(heading, content); folders.append(folder); });
   }
 
   $("#exam-date").min = new Date().toISOString().slice(0, 10);
