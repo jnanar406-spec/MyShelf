@@ -146,14 +146,32 @@
       <section id="settings" class="page">
         <h2>Settings</h2>
         <form id="settings-form">
-          <label
-            >Category
-            <select>
-              <option>School / Primary</option>
-              <option>PU</option>
-              <option>Other</option>
-            </select></label
-          ><button type="submit">Save Settings</button>
+          <label>Theme
+            <select name="theme">
+              <option value="system">Use device setting</option>
+              <option value="light">Light mode</option>
+              <option value="dark">Dark mode</option>
+            </select>
+          </label>
+          <label>Study category
+            <select name="category">
+              <option value="school-primary">School / Primary</option>
+              <option value="pu">PU</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Text size
+            <select name="text-size">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </label>
+          <label class="settings-toggle">
+            <input name="reduce-motion" type="checkbox" />
+            Reduce animations
+          </label>
+          <button type="submit">Save Settings</button>
         </form>
         <a href="#home">Back</a>
       </section>
@@ -277,25 +295,29 @@
       <section id="final-score" class="page">
         <h2>Final Score</h2>
         <p id="score-result">0 / 2</p>
-        <a href="#practice-test">Previous</a><a href="#home">Home</a>
+        <div class="final-score-actions">
+          <a href="#practice-test">Previous</a><a href="#home">Home</a>
+        </div>
       </section>
       <section id="flashcards" class="page">
         <h2>Flash Cards</h2>
-        <p class="flashcard-hint">Select the card to reveal the summary content.</p>
-        <article id="flashcard-1" class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
-          <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>SUBTOPIC</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>SUMMARY</span><p>Generated summary content will appear here.</p></section></div>
-        </article>
-        <a href="#animation-book">Save</a><a href="#learning">Previous</a
-        ><a href="#flashcard-2">Proceed</a>
-      </section>
-      <section id="flashcard-2" class="page">
-        <h2>Flash Cards</h2>
-        <p class="flashcard-hint">Select the card to reveal the summary content.</p>
-        <article class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
-          <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>SUBTOPIC</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>SUMMARY</span><p>Generated summary content will appear here.</p></section></div>
-        </article>
-        <a href="#animation-book">Save</a><a href="#flashcards">Previous</a
-        ><a href="#learning">Proceed</a>
+        <p id="flashcard-status" class="flashcard-hint" aria-live="polite">Card 1: select the card to reveal its answer.</p>
+        <section id="flashcard-list" aria-label="Flashcards">
+          <article id="flashcard-1" class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
+            <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>QUESTION</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>ANSWER</span><p>Generated summary content will appear here.</p></section></div>
+          </article>
+          <article id="flashcard-2" class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
+            <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>QUESTION</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>ANSWER</span><p>Generated summary content will appear here.</p></section></div>
+          </article>
+          <article id="flashcard-3" class="flashcard" tabindex="0" role="button" aria-label="Flip flash card">
+            <div class="flashcard-inner"><section class="flashcard-face flashcard-front"><span>QUESTION</span><h3>Upload notes to begin</h3><p>What key idea should you remember?</p></section><section class="flashcard-face flashcard-back"><span>ANSWER</span><p>Generated summary content will appear here.</p></section></div>
+          </article>
+        </section>
+        <nav id="flashcard-actions" aria-label="Flashcard actions">
+          <button id="previous-flashcard" type="button" disabled>Previous flashcard</button>
+          <a id="save-flashcards" href="#animation-book">Save flashcards</a>
+          <a href="#learning">Back to Learning</a>
+        </nav>
       </section>
       <section id="animation-book" class="page">
         <h2>Animation Book</h2>
@@ -352,9 +374,11 @@
           <h3>Notifications</h3>
           <p>Exam reminders will appear here until the scheduled date.</p>
         </section>
-        <a href="#schedule-exam">Back</a
-        ><a id="start-scheduled-exam" href="#exam">Proceed to Exam</a
-        ><a href="#home">Home</a>
+        <nav id="exam-reminder-actions" aria-label="Exam reminder actions">
+          <a href="#schedule-exam">Back</a>
+          <a id="start-scheduled-exam" href="#exam">Proceed to Exam</a>
+          <a href="#home">Home</a>
+        </nav>
       </section>
       <section id="exam" class="page">
         <header>

@@ -17,6 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
     uploadedFile: "",
     uploadedText: "",
     aiSummary: "",
+    settings: {
+      theme: "system",
+      textSize: "medium",
+      reduceMotion: false,
+    },
   };
 
   const read = () => {
@@ -29,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         users: Array.isArray(stored.users) ? stored.users : [],
         saved: Array.isArray(stored.saved) ? stored.saved : [],
         badges: { ...defaults.badges, ...(stored.badges || {}) },
+        settings: { ...defaults.settings, ...(stored.settings || {}) },
       };
     } catch {
       return { ...defaults };
@@ -39,6 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const write = () =>
     localStorage.setItem(key, JSON.stringify(data));
+
+  const applySettings = () => {
+    const { theme, textSize, reduceMotion } = data.settings;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = theme === "dark" || (theme === "system" && prefersDark);
+
+    document.body.classList.toggle("theme-dark", isDark);
+    document.body.classList.toggle("reduce-motion", reduceMotion);
+    document.body.dataset.textSize = textSize;
+
+    const form = $("#settings-form");
+    form.elements["theme"].value = theme;
+    form.elements["category"].value =
+      sessionUser()?.category || "school-primary";
+    form.elements["text-size"].value = textSize;
+    form.elements["reduce-motion"].checked = reduceMotion;
+  };
 
   const go = (page) => {
     location.hash = `#${page}`;
@@ -76,7 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "practice-test-2",
     "final-score",
     "flashcards",
-    "flashcard-2",
     "animation-book",
     "exam-mode-actions",
     "schedule-exam",
@@ -172,31 +194,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!user) return;
 
     const fields = $$("#profile-details dd");
-<<<<<<< HEAD
     const priorities = user.subjectPriorities?.length ? user.subjectPriorities.map((subject, index) => `${index + 1}. ${subject}`).join(", ") : user.prioritySubject ? `1. ${user.prioritySubject}` : "Not selected";
     [user.name, user.username, user.email, user.category || "Not selected", (user.subjects || []).filter(Boolean).join(", ") || "No subjects", priorities].forEach((value, index) => fields[index].textContent = value);
-=======
-
-    [
-      user.name,
-      user.username,
-      user.email,
-      user.category || "Not selected",
-      (user.subjects || [])
-        .filter(Boolean)
-        .join(", ") || "No subjects",
-    ].forEach(
-      (value, index) =>
-        (fields[index].textContent = value),
-    );
-
->>>>>>> ebfa7e1 (Add Gemini AI backend and update frontend)
     const form = $("#edit-profile-form");
 
     form.elements["name"].value = user.name;
     form.elements["username"].value = user.username;
     form.elements["email"].value = user.email;
-<<<<<<< HEAD
     form.elements["category"].value = user.category || "School / Primary";
     form.elements["subjects"].value = (user.subjects || []).filter(Boolean).join(", ");
     updatePriorityOptions(user.subjectPriorities || (user.prioritySubject ? [user.prioritySubject] : []));
@@ -214,15 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
       subjects.forEach((_, index) => select.add(new Option(`Priority ${index + 1}`, String(index + 1)))); select.value = savedRank ? String(savedRank) : "";
       label.append(select); list.append(label);
     });
-=======
-    form.elements["category"].value =
-      user.category || "School / Primary";
-
-    form.elements["subjects"].value =
-      (user.subjects || [])
-        .filter(Boolean)
-        .join(", ");
->>>>>>> ebfa7e1 (Add Gemini AI backend and update frontend)
   }
 
   $("#signup-form").addEventListener(
@@ -358,7 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   $$("#account-actions a").forEach((link) => {
-<<<<<<< HEAD
     if (link.textContent.trim() === "Logout") link.addEventListener("click", () => { data.session = null; write(); notify("You have been logged out."); });
   });
   $("#delete-account a[href='#signup']").addEventListener("click", (event) => {
@@ -376,187 +370,62 @@ document.addEventListener("DOMContentLoaded", () => {
     user.name = form.elements["name"].value.trim(); user.username = form.elements["username"].value.trim(); user.email = form.elements["email"].value.trim().toLowerCase(); user.category = form.elements["category"].value; user.subjects = form.elements["subjects"].value.split(",").map((item) => item.trim()).filter(Boolean); user.subjectPriorities = ranked; delete user.prioritySubject; data.session = user.email; write(); notify(ranked.length ? `Subject priorities saved: ${ranked.map((subject, index) => `${index + 1}. ${subject}`).join(", ")}.` : "Profile updated."); go("account");
   });
   $("#edit-profile-form").elements["subjects"].addEventListener("input", () => updatePriorityOptions());
-  $("#settings-form").addEventListener("submit", (event) => { event.preventDefault(); write(); notify("Settings saved."); go("home"); });
+  const saveSettings = (form) => {
+    data.settings = {
+      theme: form.elements["theme"].value,
+      textSize: form.elements["text-size"].value,
+      reduceMotion: form.elements["reduce-motion"].checked,
+    };
+
+    const user = sessionUser();
+
+    if (user) {
+      user.category = form.elements["category"].value;
+    }
+
+    applySettings();
+    write();
+  };
+
+  $("#settings-form").addEventListener("change", (event) => {
+    saveSettings(event.currentTarget);
+    notify("Setting applied across the app.");
+  });
+
+  $("#settings-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    saveSettings(form);
+    notify("Settings saved and applied across the app.");
+    go("home");
+  });
   $$("#pro-plan button").forEach((button) => button.addEventListener("click", () => notify(`${button.textContent.trim()} is a frontend-only placeholder.`)));
 
   const cleanText = (text) => text.replace(/\s+/g, " ").trim();
   const sentencesFromNotes = () => (data.uploadedText || "").match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(cleanText).filter((sentence) => sentence.length > 20) || [];
-  const noteSummary = () => {
-    const sentences = sentencesFromNotes(), sourceLength = data.uploadedText?.length || 0;
-    if (!sentences.length) return [];
-    // Long uploads receive about 5,500 characters (roughly 1½ reading pages), sampled across the document.
-    const targetCharacters = sourceLength >= 25000 ? 5500 : Math.min(4000, Math.max(1200, Math.round(sourceLength * 0.2)));
-    const averageLength = Math.max(1, Math.round(sentences.reduce((total, sentence) => total + sentence.length, 0) / sentences.length));
-    const count = Math.min(sentences.length, Math.max(3, Math.ceil(targetCharacters / averageLength)));
-    if (count === sentences.length) return sentences;
-    return Array.from({ length: count }, (_, index) => sentences[Math.round(index * (sentences.length - 1) / (count - 1))]);
-  };
-  const speak = (text) => { if (!("speechSynthesis" in window)) return notify("Voice narration is not available in this browser."); speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.94; speechSynthesis.speak(utterance); };
-  const stopSpeaking = () => window.speechSynthesis?.cancel();
-=======
-    if (link.textContent.trim() === "Logout") {
-      link.addEventListener("click", () => {
-        data.session = null;
-
-        write();
-
-        notify("You have been logged out.");
-      });
-    }
-  });
-
-  $("#delete-account a[href='#signup']").addEventListener(
-    "click",
-    (event) => {
-      event.preventDefault();
-
-      if (
-        !confirm(
-          "Delete this local account and its saved progress?",
-        )
-      )
-        return;
-
-      data.users = data.users.filter(
-        (user) => user.email !== data.session,
-      );
-
-      data.session = null;
-      data.saved = [];
-      data.score = 0;
-      data.streak = 0;
-
-      write();
-
-      go("signup");
-    },
-  );
-
-  $("#edit-profile-form").addEventListener(
-    "submit",
-    (event) => {
-      event.preventDefault();
-
-      const form = event.currentTarget;
-      const user = sessionUser();
-
-      if (!user || !form.reportValidity())
-        return;
-
-      user.name =
-        form.elements["name"].value.trim();
-
-      user.username =
-        form.elements["username"].value.trim();
-
-      user.email =
-        form.elements["email"].value
-          .trim()
-          .toLowerCase();
-
-      user.category =
-        form.elements["category"].value;
-
-      user.subjects =
-        form.elements["subjects"].value
-          .split(",")
-          .map((item) => item.trim());
-
-      data.session = user.email;
-
-      write();
-
-      notify("Profile updated.");
-
-      go("account");
-    },
-  );
-
-  $("#settings-form").addEventListener(
-    "submit",
-    (event) => {
-      event.preventDefault();
-
-      write();
-
-      notify("Settings saved.");
-
-      go("home");
-    },
-  );
-
-  $$("#pro-plan button").forEach((button) =>
-    button.addEventListener(
-      "click",
-      () =>
-        notify(
-          `${button.textContent.trim()} is a frontend-only placeholder.`,
-        ),
-    ),
-  );
-
-  /* ================================
-     NOTES + GEMINI
-     ================================ */
-
-  const cleanText = (text) =>
-    text.replace(/\s+/g, " ").trim();
-
-  const sentencesFromNotes = () =>
-    (data.uploadedText || "")
+  const localSummary = (text) => {
+    const sentences = (text || "")
       .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
       ?.map(cleanText)
-      .filter(
-        (sentence) => sentence.length > 20,
-      ) || [];
+      .filter(Boolean) || [];
 
-  /*
-     IMPORTANT:
-     noteSummary now uses the Gemini-generated
-     summary instead of the original uploaded text.
-  */
-
+    return sentences.slice(0, 5).join(" ") || cleanText(text || "").slice(0, 1200);
+  };
   const noteSummary = () =>
     (data.aiSummary || "")
       .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
       ?.map(cleanText)
-      .filter(
-        (sentence) => sentence.length > 20,
-      )
+      .filter((sentence) => sentence.length > 20)
       .slice(0, 3) || [];
-
-  const speak = (text) => {
-    if (!("speechSynthesis" in window))
-      return notify(
-        "Voice narration is not available in this browser.",
-      );
-
-    speechSynthesis.cancel();
-
-    const utterance =
-      new SpeechSynthesisUtterance(text);
-
-    utterance.rate = 0.94;
-
-    speechSynthesis.speak(utterance);
-  };
-
-  const stopSpeaking = () =>
-    window.speechSynthesis?.cancel();
-
-  /* ================================
-     FLASHCARD GENERATION
-     ================================ */
-
->>>>>>> ebfa7e1 (Add Gemini AI backend and update frontend)
+  const speak = (text) => { if (!("speechSynthesis" in window)) return notify("Voice narration is not available in this browser."); speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.94; speechSynthesis.speak(utterance); };
+  const stopSpeaking = () => window.speechSynthesis?.cancel();
   const makeCards = () => {
     const points = noteSummary();
 
     if (!points.length) return [];
 
-    return [0, 1].map((index) => {
-      const content =
-        points[index] || points[0];
+    return points.slice(0, 3).map((content) => {
 
       const topic = content
         .split(/\s+/)
@@ -621,37 +490,33 @@ document.addEventListener("DOMContentLoaded", () => {
              Send uploaded text to backend.
           */
 
-          const response = await fetch(
-            "http://localhost:5000/api/summarize",
-            {
-              method: "POST",
+          let usedLocalSummary = false;
 
-              headers: {
-                "Content-Type":
-                  "application/json",
+          try {
+            const response = await fetch(
+              "http://localhost:5000/api/summarize",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  text: data.uploadedText,
+                }),
               },
-
-              body: JSON.stringify({
-                text: data.uploadedText,
-              }),
-            },
-          );
-
-          const result =
-            await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              result.error ||
-                "Gemini summarization failed.",
             );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.summary) {
+              throw new Error(result.error || "Gemini summarization failed.");
+            }
+
+            data.aiSummary = result.summary;
+          } catch (error) {
+            usedLocalSummary = true;
+            data.aiSummary = localSummary(data.uploadedText);
           }
-
-          /*
-             Store Gemini summary.
-          */
-
-          data.aiSummary = result.summary;
 
           markStudy();
 
@@ -681,7 +546,9 @@ document.addEventListener("DOMContentLoaded", () => {
           practiceTest.refresh();
 
           notify(
-            "Summary and flashcards generated. Save to Animation Book when you’re ready.",
+            usedLocalSummary
+              ? "The AI backend is unavailable, so a local summary was created. Start the backend to use Gemini summaries."
+              : "Summary and flashcards generated. Save to Animation Book when you’re ready.",
           );
 
           go("learning");
@@ -738,8 +605,11 @@ document.addEventListener("DOMContentLoaded", () => {
      FLASHCARD DISPLAY
      ================================ */
 
-  function flashCard(page, index) {
-    const article = $("article", page);
+  const flashcardArticles = $$("#flashcard-list .flashcard");
+  let currentCardIndex = 0;
+  let showingAnswer = false;
+
+  function flashCard(article, index) {
 
     const frontTitle =
       $(".flashcard-front h3", article);
@@ -753,9 +623,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const draw = () => {
       const current = cards[index];
 
-      article.classList.remove(
-        "is-flipped",
-      );
+      const isCurrent = index === currentCardIndex;
+      article.hidden = !isCurrent;
+      article.classList.toggle("is-current", isCurrent);
+      article.classList.toggle("is-flipped", isCurrent && showingAnswer);
+
+      if (isCurrent) {
+        $("#flashcard-status").textContent = current
+          ? `Card ${index + 1} of ${cards.length}: ${showingAnswer ? "answer visible — select the card for the next question." : "select the card to reveal its answer."}`
+          : "Upload notes to generate flashcards.";
+
+        $("#previous-flashcard").disabled = currentCardIndex === 0;
+      }
 
       if (!current) {
         frontTitle.textContent =
@@ -780,15 +659,33 @@ document.addEventListener("DOMContentLoaded", () => {
         current.content;
     };
 
-    const flip = () => {
-      article.classList.toggle(
-        "is-flipped",
-      );
+    const interact = () => {
+      if (index !== currentCardIndex) return;
+
+      if (!cards[index]) {
+        return notify("Upload notes to generate flashcards first.");
+      }
+
+      if (!showingAnswer) {
+        showingAnswer = true;
+        redrawCards.forEach((redraw) => redraw());
+        return;
+      }
+
+      if (currentCardIndex < cards.length - 1) {
+        currentCardIndex += 1;
+        showingAnswer = false;
+        redrawCards.forEach((redraw) => redraw());
+        flashcardArticles[currentCardIndex].focus();
+        return;
+      }
+
+      notify("You have completed all flashcards. Select Save flashcards to keep them.");
     };
 
     article.addEventListener(
       "click",
-      flip,
+      interact,
     );
 
     article.addEventListener(
@@ -799,71 +696,65 @@ document.addEventListener("DOMContentLoaded", () => {
           event.key === " "
         ) {
           event.preventDefault();
-          flip();
+          interact();
         }
       },
     );
 
     draw();
 
-    $("a[href='#animation-book']", page)
-      .addEventListener(
-        "click",
-        (event) => {
-          event.preventDefault();
-
-          const current = cards[index];
-
-          if (!current)
-            return notify(
-              "Generate flashcards from an uploaded summary first.",
-            );
-
-          const saved = {
-            type: "Flash Card",
-            subject: subjectForUpload(),
-            title: current.topic,
-            content: current.content,
-          };
-
-          if (
-            !data.saved.some(
-              (item) =>
-                item.type === saved.type &&
-                item.title === saved.title &&
-                item.subject ===
-                  saved.subject,
-            )
-          ) {
-            data.saved.push(saved);
-          }
-
-          markStudy();
-
-          write();
-
-          notify(
-            `Flashcard saved to the ${saved.subject} folder in Animation Book.`,
-          );
-
-          go("animation-book");
-        },
-      );
-
     return draw;
   }
 
-  const redrawCards = [
-    flashCard(
-      $("#flashcards"),
-      0,
-    ),
+  const redrawCards = flashcardArticles
+    .map((article, index) => flashCard(article, index));
 
-    flashCard(
-      $("#flashcard-2"),
-      1,
-    ),
-  ];
+  $("#previous-flashcard").addEventListener("click", () => {
+    if (!currentCardIndex) {
+      return notify("You are already on the first flashcard.");
+    }
+
+    currentCardIndex -= 1;
+    showingAnswer = false;
+    redrawCards.forEach((redraw) => redraw());
+    flashcardArticles[currentCardIndex].focus();
+  });
+
+  $("#save-flashcards").addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (!cards.length) {
+      return notify("Generate flashcards from an uploaded summary first.");
+    }
+
+    cards.forEach((card) => {
+      const saved = {
+        type: "Flash Card",
+        subject: subjectForUpload(),
+        title: card.topic,
+        question: card.question,
+        answer: card.content,
+        content: `Question: ${card.question}\n\nAnswer: ${card.content}`,
+      };
+
+      const existing = data.saved.find((item) =>
+        item.type === saved.type &&
+        item.title === saved.title &&
+        item.subject === saved.subject,
+      );
+
+      if (existing) {
+        Object.assign(existing, saved);
+      } else {
+        data.saved.push(saved);
+      }
+    });
+
+    markStudy();
+    write();
+    notify(`Flashcards saved to the ${subjectForUpload()} folder in Animation Book.`);
+    go("animation-book");
+  });
 
   /* ================================
      SAVE SUMMARY
@@ -1280,6 +1171,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================================
      START APPLICATION
      ================================ */
+
+  applySettings();
 
   if (!location.hash)
     go(

@@ -35,11 +35,12 @@ window.LearnFeatures.createPracticeTest = ({ $, $$, notify, go, getSummary }) =>
       label.lastChild.textContent = ` ${item ? item.options[option] : "Upload notes to begin"}`;
       if (!item) return;
       if (answers[index] === undefined) label.classList.add("is-selected");
-      else if (option === item.answer) label.classList.add("is-correct");
-      else if (option === answers[index]) label.classList.add("is-incorrect");
+      else if (option === answers[index]) label.classList.add(
+        option === item.answer ? "is-correct" : "is-incorrect",
+      );
     });
     $(".explanation", page).textContent = answers[index] === undefined || !item ? "Choose an answer to see its explanation." : item.explanation;
-    setFeedback(page, !item ? "Summary questions will appear after you upload a readable file." : answers[index] === undefined ? "Select an answer. Yellow marks options awaiting your selection." : answers[index] === item.answer ? "Correct — the answer is highlighted in green." : "Not quite — your choice is red and the correct answer is green.", !item || answers[index] === undefined ? "pending" : answers[index] === item.answer ? "correct" : "incorrect");
+    setFeedback(page, !item ? "Summary questions will appear after you upload a readable file." : answers[index] === undefined ? "Select an answer. Yellow marks options awaiting your selection." : answers[index] === item.answer ? "Correct — your selected answer is green." : "Not quite — your selected answer is red.", !item || answers[index] === undefined ? "pending" : answers[index] === item.answer ? "correct" : "incorrect");
     renderAnswerBook();
   };
   const grade = (index, page) => {
